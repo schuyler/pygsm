@@ -499,7 +499,7 @@ class GsmModem(object):
                 # store the incoming data to be picked up
                 # from the attr_accessor as a tuple (this
                 # is kind of ghetto, and WILL change later)
-                self._add_incoming(timestamp, sender, text)
+                self._add_incoming(timestamp, sender, text, index)
 
                 # don't loop! the only reason that this
                 # "while" exists is to jump out early
@@ -514,7 +514,7 @@ class GsmModem(object):
         return output_lines
 
 
-    def _add_incoming(self, timestamp, sender, text):
+    def _add_incoming(self, timestamp, sender, text, index=0):
 
         # since neither message notifications nor messages
         # fetched from storage give any indication of their
@@ -582,16 +582,6 @@ class GsmModem(object):
             # Outer handler: if the command caused an error,
             # maybe wrap it and return None
             except errors.GsmError, err:
-
-                # if GSM Error 515 (init or command in progress) was raised,
-                # lock the thread for a short while, and retry. don't lock
-                # the modem while we're waiting, because most commands WILL
-                # work during the init period - just not _cmd_
-                if getattr(err, "code", None) == 515:
-                    time.sleep(self.retry_delay)
-                    retries += 1
-                    continue
-
                 # if raise_errors is disabled, it doesn't matter
                 # *what* went wrong - we'll just ignore it
                 if not raise_errors:
@@ -1054,7 +1044,7 @@ class GsmModem(object):
         while len(lines)>0:
             if m is None:
                 # couldn't match OR no text data following match
-                raise(errors.GsmReadError())
+                raise(errors.GsmReadError(lines[0]))
 
             # if here, we have a match AND text
             # start by popping the header (which we have stored in the 'm'
@@ -1079,7 +1069,7 @@ class GsmModem(object):
             msg_text=msg_buf.getvalue().strip()
 
             # now create message
-            self._add_incoming(timestamp,sender,msg_text)
+            self._add_incoming(timestamp,sender,msg_text, index)
             num_found+=1
 
         return num_found

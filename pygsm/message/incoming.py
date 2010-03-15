@@ -7,7 +7,7 @@ import datetime
 
 
 class IncomingMessage(object):
-    def __init__(self, device, sender, sent, text):
+    def __init__(self, device, sender, sent, text, index=0):
 
         # move the arguments into "private" attrs,
         # to try to prevent from from being modified
@@ -15,6 +15,7 @@ class IncomingMessage(object):
         self._sender = sender
         self._sent   = sent
         self._text   = text
+        self._index  = index
 
         # assume that the message was
         # received right now, since we
@@ -38,6 +39,11 @@ class IncomingMessage(object):
         """Returns the pygsm.GsmModem device which received
            the SMS, and created this IncomingMessage object."""
         return self._device
+
+    @property
+    def index(self):
+        """Returns the index of this message on the modem."""
+        return self._index
 
     @property
     def sender(self):
