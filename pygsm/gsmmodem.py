@@ -1070,6 +1070,9 @@ class GsmModem(object):
 
             # now create message
             self._add_incoming(timestamp,sender,msg_text, index)
+
+            # now remove it from storage
+            self.command("AT+CMGD=%s" % index)
             num_found+=1
 
         return num_found
@@ -1103,8 +1106,6 @@ class GsmModem(object):
         # remove the message that has been waiting
         # longest from the queue, and return it
         return self.incoming_queue.pop(0)
-
-
 
 
 if __name__ == "__main__":
